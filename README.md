@@ -6,10 +6,28 @@
 * cohesion: steer to move towards the average position (center of mass) of local flockmates
 
 ## About this repository
-This repository tries to reimplement [this](https://www.youtube.com/watch?v=mhjuuHl6qHM) which is in p5.js.
-This repo is based on the python version of p5.
+This repository is a fork of the Boids project located here:
+https://github.com/roholazandie/boids
+
+The change to the code was removal of P5 as the graphic rendering engine and replaced with PySimpleGUI and PySimpleGUIWeb.  With the addition of the GUI came a slider that enables you to adjust, in real time, the number of birds.
+
+## GUI Platforms
+
+By the magic of PySimpleGUI this code is running both on the desktop in the form of a tkinter window but also it runs in the browser.  The only required change to the program was the import statement.  That's ALL you have to change to move from the desktop to the browser.  Amazing.
+
+### Tkinter version
+`import PySimpleGUI as sg`
+
+![Boids - Tk](https://user-images.githubusercontent.com/13696193/59565880-8ec5de80-9026-11e9-9832-ab7b05fd7b5c.gif)
+
+### Browser based
+`import PySimpleGUIWeb as sg`
+
+![Boids - Web](https://user-images.githubusercontent.com/13696193/59565883-9a190a00-9026-11e9-80c9-1822b2cda6af.gif)
+
 
 ## Installation
+
  Run:
  ```
  sudo apt-get install libglfw3
@@ -17,7 +35,7 @@ This repo is based on the python version of p5.
  ```
 pip install -r requirements.txt
 ```
-For using fast boid:
+For using fast boid:  (Not yet ported)
 ```
 pip install ray
 ```
