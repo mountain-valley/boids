@@ -5,13 +5,16 @@
 * alignment: steer towards the average heading of local flockmates
 * cohesion: steer to move towards the average position (center of mass) of local flockmates
 
-## About this repository
+## PySimpleGUI - the GUI engine
+This fork of boid is a port to the PySimpleGUI framework.  It is currently running on the tkinter and the browser ports.  It alsmot ran on the Qt port (very close)
+
+## About this repository (boids-PySimpleGUI)
 This repository is a fork of the Boids project located here:
 https://github.com/roholazandie/boids
 
 The change to the code was removal of P5 as the graphic rendering engine and replaced with PySimpleGUI and PySimpleGUIWeb.  With the addition of the GUI came a slider that enables you to adjust, in real time, the number of birds.
 
-## GUI Platforms
+## GUI Platforms - Desktop and Browser
 
 By the magic of PySimpleGUI this code is running both on the desktop in the form of a tkinter window but also it runs in the browser.  The only required change to the program was the import statement.  That's ALL you have to change to move from the desktop to the browser.  Amazing.
 
