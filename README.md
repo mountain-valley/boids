@@ -5,6 +5,9 @@ https://medium.com/better-programming/boids-simulating-birds-flock-behavior-in-p
 
 Note that the PySimpleGUI code will not be covered in the article as it's a new addition.
 
+See this code running in your browser window right away:
+https://repl.it/@PySimpleGUI/Boids-on-PySimpleGUI
+
 ## What is Boids?
 [Boids](https://en.wikipedia.org/wiki/Boids) is an artificial life program developed by Craig Reynolds which simultes the flocking behaviour of birds.As with most artificial life simulations, Boids is an example of emergent behavior; that is, the complexity of Boids arises from the interaction of individual agents (the boids, in this case) adhering to a set of simple rules. The rules applied in the simplest Boids world are as follows:
 
