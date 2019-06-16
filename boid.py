@@ -1,5 +1,7 @@
-from p5 import Vector, stroke, circle
+from p5 import Vector
 import numpy as np
+# import PySimpleGUIWeb as sg
+import PySimpleGUI as sg
 
 class Boid():
 
@@ -16,7 +18,7 @@ class Boid():
 
         self.width = width
         self.height = height
-
+        self.drawing_id = None
 
 
     def update(self):
@@ -28,10 +30,12 @@ class Boid():
 
         self.acceleration = Vector(*np.zeros(2))
 
-    def show(self):
-        stroke(255)
-
-        circle((self.position.x, self.position.y), radius=10)
+    def show(self, window):
+        graph = window.Element('_GRAPH_')       # type: sg.Graph
+        if self.drawing_id is None:
+            self.drawing_id = graph.DrawCircle((self.position.x, self.position.y), radius=3, fill_color='black')
+        else:
+            graph.RelocateFigure(self.drawing_id, self.position.x, self.position.y)
 
 
     def apply_behaviour(self, boids):
