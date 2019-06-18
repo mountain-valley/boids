@@ -5,20 +5,20 @@ import PySimpleGUI as sg
 
 width = 400
 height = 400
-current_num_birds = starting_num_birds = 40
+starting_num_birds = 40
 
-flock = [Boid(*np.random.rand(2)*1000, width, height) for _ in range(starting_num_birds)]   # type: Boid:list
 
-def draw(window):
-
+def draw(window, flock):
     for boid in flock:
         boid.edges()
         boid.apply_behaviour(flock)
         boid.update()
         boid.show(window)
 
+
 def main():
-    global  flock, current_num_birds
+    flock = [Boid(*np.random.rand(2)*1000, width, height) for _ in range(starting_num_birds)]   # type: Boid:list
+    current_num_birds = starting_num_birds
 
     layout =    [[sg.Text('Boid Flocking'), sg.Text('Number Birds = '), sg.Text('', size=(4,1), key='_NUM_BIRDS_')],
                 [sg.Graph((width,height), (0,0), (width,height), background_color='GhostWhite', key='_GRAPH_')],
@@ -42,7 +42,7 @@ def main():
                     del flock[-1]
             current_num_birds = num_birds
         window.Element('_NUM_BIRDS_').Update(current_num_birds)
-        draw(window)
+        draw(window, flock)
 
 
     window.Close()
