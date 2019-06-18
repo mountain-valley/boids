@@ -7,6 +7,7 @@ width = 1000
 height = 1000
 starting_num_birds = 40
 
+size_choices = {'1000x1000':1000, '800x800':800, '400x400':400, '200x200':200}
 
 def draw(window, flock):
     for boid in flock:
@@ -17,6 +18,17 @@ def draw(window, flock):
 
 
 def main():
+    layout = [  [sg.Text('What size of window would you like?')],
+                [sg.Combo(list(size_choices.keys()), key='_COMBO_')],
+                [sg.OK(), sg.Cancel()]]
+    window = sg.Window('Choose size of window', layout)
+    event, values = window.Read()
+    window.Close()
+    if event in (None, 'Cancel'):
+        exit()
+    width = height = size_choices[values['_COMBO_']]
+
+
     flock = [Boid(*np.random.rand(2)*1000, width, height) for _ in range(starting_num_birds)]   # type: Boid:list
     current_num_birds = starting_num_birds
 
