@@ -5,7 +5,11 @@ https://medium.com/better-programming/boids-simulating-birds-flock-behavior-in-p
 
 Note that the PySimpleGUI code will not be covered in the article as it's a new addition.
 
-See this code running in your browser window right away:
+# Boids on PySimpleGUI
+
+![Boids bigger](https://user-images.githubusercontent.com/13696193/59730324-f0956c80-920f-11e9-9f49-42c64185ffc1.gif)
+
+Can't wait to download and run the code??  Immediately see this code running in your browser window (albeit SLOWLY):
 https://repl.it/@PySimpleGUI/Boids-on-PySimpleGUI
 
 ## What is Boids?
@@ -22,7 +26,7 @@ This fork of boid is a port to the PySimpleGUI framework.  It is currently runni
 This repository is a fork of the Boids project located here:
 https://github.com/roholazandie/boids
 
-The change to the code was removal of P5 as the graphic rendering engine and replaced with PySimpleGUI and PySimpleGUIWeb.  With the addition of the GUI came a slider that enables you to adjust, in real time, the number of birds.
+The change to the code was removal of P5 as the graphic rendering engine and replaced with PySimpleGUI and PySimpleGUIWeb.  With the addition of the GUI came a slider that enables you to adjust, in real time, the number of birds.   Then came manipulation of more internal variables. Who knows what other fun **you** can add!
 
 ## GUI Platforms - Desktop and Browser
 
