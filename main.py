@@ -67,4 +67,4 @@ def main(count):
     window.Close()
 
 if __name__ == '__main__':
-    main(10)
+    main(40)
