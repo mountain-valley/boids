@@ -38,7 +38,8 @@ def main(count):
                  [sg.Exit()],]
 
     window = sg.Window('Boids', layout)
-    graph = window.Element('_GRAPH_')               # type: sg.Graph
+    window.Finalize()
+    # graph = window.Element('_GRAPH_')               # type: sg.Graph
     flock = Boid(count, window, width, height)   # type: Boid:list
     while True:
         event, values = window.Read(timeout=0)

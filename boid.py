@@ -30,9 +30,7 @@ class Boid():
         graph = window.Element('_GRAPH_')  # type: sg.Graph
         self.drawing_ids = np.empty(self.boid_count)
         self.edges()
-        ID = graph.DrawCircle((100.5, 56.8), radius=3, fill_color='black')
         for i, (x, y) in enumerate(zip(self.positions[0, :], self.positions[1, :])):
-            id = graph.DrawCircle((x, y), radius=3, fill_color='black')
             self.drawing_ids[i] = graph.DrawCircle((x, y), radius=3, fill_color='black')
 
         # self.acceleration = Vector(*vec)
