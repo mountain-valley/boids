@@ -10,15 +10,14 @@ starting_num_birds = 40
 size_choices = {'1000x1000':1000, '800x800':800, '400x400':400, '200x200':200}
 
 def draw(window, flock):
-    for boid in flock:
-        boid.edges()
-        boid.apply_behaviour(flock)
-        boid.update()
-        boid.show(window)
+    flock.edges()
+    flock.apply_behaviour()
+    flock.update()
+    flock.show(window)
 
 
-def main():
-    layout = [  [sg.Text('What size of window would you like?')],
+def main(count):
+    layout = [[sg.Text('What size of window would you like?')],
                 [sg.Combo(list(size_choices.keys()), key='_COMBO_')],
                 [sg.OK(), sg.Cancel()]]
     window = sg.Window('Choose size of window', layout)
@@ -28,9 +27,7 @@ def main():
         exit()
     width = height = size_choices[values['_COMBO_']]
 
-
-    flock = [Boid(*np.random.rand(2)*1000, width, height) for _ in range(starting_num_birds)]   # type: Boid:list
-    current_num_birds = starting_num_birds
+    current_num_birds = count
 
     layout =    [[sg.Text('Boid Flocking'), sg.Text('Number Birds = '), sg.Text('', size=(4,1), key='_NUM_BIRDS_')],
                 [sg.Graph((width,height), (0,0), (width,height), background_color='GhostWhite', key='_GRAPH_')],
@@ -42,33 +39,31 @@ def main():
 
     window = sg.Window('Boids', layout)
     graph = window.Element('_GRAPH_')               # type: sg.Graph
+    flock = Boid(count, window, width, height)   # type: Boid:list
     while True:
         event, values = window.Read(timeout=0)
         if event in (None, 'Exit'):
             break
-        if event == '_SLIDER_':
-            num_birds = int(values['_SLIDER_'])
-            if num_birds > current_num_birds:
-                flock = flock + [Boid(*np.random.rand(2)*1000, width, height) for _ in range(num_birds-current_num_birds)]
-            else:
-                for i in range(current_num_birds-num_birds):
-                    graph.DeleteFigure(flock[-1].drawing_id)
-                    del flock[-1]
-            current_num_birds = num_birds
+        # if event == '_SLIDER_':
+        #     num_birds = int(values['_SLIDER_'])
+        #     if num_birds > current_num_birds:
+        #         flock = flock + [Boid(*np.random.rand(2)*1000, width, height) for _ in range(num_birds-current_num_birds)]
+        #     else:
+        #         for i in range(current_num_birds-num_birds):
+        #             graph.DeleteFigure(flock[-1].drawing_id)
+        #             del flock[-1]
+        #     current_num_birds = num_birds
         elif event.startswith('_SLIDER_'):
             max_force = float(values['_SLIDER_FORCE_'])
             max_speed = int(values['_SLIDER_SPEED_'])
             perception = int(values['_SLIDER_PERCEPTION_'])
-            for bird in flock:
-                bird = bird  # type: boid.Boid
-                bird.max_force = max_force
-                bird.max_speed = max_speed
-                bird.perception = perception
+            flock.move_to_middle_strength = max_force
+            flock.max_speed = max_speed
+            flock.alert_distance = perception
         window.Element('_NUM_BIRDS_').Update(current_num_birds)
         draw(window, flock)
-
 
     window.Close()
 
 if __name__ == '__main__':
-    main()
+    main(10)
