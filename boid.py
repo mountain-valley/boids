@@ -28,7 +28,7 @@ class Boid():
 
         # initialize graph ids
         graph = window.Element('_GRAPH_')  # type: sg.Graph
-        self.drawing_ids = np.empty(self.boid_count)
+        self.drawing_ids = np.empty(self.boid_count, dtype=int)
         self.edges()
         for i, (x, y) in enumerate(zip(self.positions[0, :], self.positions[1, :])):
             self.drawing_ids[i] = graph.DrawCircle((x, y), radius=3, fill_color='black')
