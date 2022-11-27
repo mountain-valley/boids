@@ -7,9 +7,16 @@ import PySimpleGUI as sg
 class Boid():
 
     def __init__(self, count, window, width, height):
-        self.boid_count = count
+        # graph attributes
         self.width = width
         self.height = height
+        self.topmargin = height - 25
+        self.bottommargin = 25
+        self.rightmargin = width - 25
+        self.leftmargin = 25
+        self.turnfactor = 0.001
+
+        self.boid_count = count
         self.limits = np.array([2000, 2000])
         self.positions = self.new_flock(self.boid_count, np.array([0, 0]), np.array([self.width, self.height]))
         self.velocities = self.new_flock(self.boid_count, np.array([0, -20]), np.array([10, 20]))
@@ -17,14 +24,14 @@ class Boid():
         self.square_distances = None
 
         # limits
-        self.max_speed = 5
+        self.max_speed = 3
 
         # parameters
-        self.alert_distance = 100  # for collision avoidance
-        self.group_distance = 10000  # for center of mass
-        self.formation_flying_distance = 10000  # for velocity matching
-        self.move_to_middle_strength = 0.01  # for towards center of mass
-        self.formation_flying_strength = 0.125  # for velocity matching
+        self.alert_distance = 10 ** 2  # for collision avoidance
+        self.group_distance = 75 ** 2  # for center of mass
+        self.formation_flying_distance = 75 ** 2  # for velocity matching
+        self.move_to_middle_strength = 1  # for towards center of mass
+        self.formation_flying_strength = 5  # for velocity matching
 
         # initialize graph ids
         graph = window.Element('_GRAPH_')  # type: sg.Graph
@@ -44,7 +51,6 @@ class Boid():
         return lower_limits[:, np.newaxis] + np.random.rand(2, count) * width[:, np.newaxis]
 
     def update(self):
-        self.positions += self.velocities
 
         # limit the speed
         # self.velocities[self.velocities > self.max_speed] = (np.divide(self.velocities[0, :], np.linalg.norm(self.velocities, axis=0)) * self.max_speed)[too_fast]
@@ -59,6 +65,8 @@ class Boid():
 
         # self.velocity += self.acceleration
         # self.acceleration = Vector(*np.zeros(2))
+        self.positions += self.velocities
+
 
     def show(self, window):
         graph = window.Element('_GRAPH_')  # type: sg.Graph
@@ -90,21 +98,42 @@ class Boid():
         """
         keeps the birds in the frame by making them roll-over to the other side.
         """
-        for x, y in zip(self.positions[0, :], self.positions[1, :]):
-            if x > self.width:
-                x = 0
-            elif x < 0:
-                x = self.width
+        for i in range(self.boid_count):
+            if self.positions[0, i] > self.width:
+                self.positions[0, i] = 0
+            elif self.positions[0, i] < 0:
+                self.positions[0, i] = self.width
 
-            if y > self.height:
-                y = 0
-            elif y < 0:
-                y = self.height
+            if self.positions[1, i] > self.height:
+                self.positions[1, i] = 0
+            elif self.positions[1, i] < 0:
+                self.positions[1, i] = self.height
+
+            # turn when approaching edges
+            if self.positions[0, i] < self.leftmargin:
+                self.velocities[0, i] = self.velocities[0, i] + self.turnfactor
+            if self.positions[0, i] > self.rightmargin:
+                self.velocities[0, i] = self.velocities[0, i] - self.turnfactor
+            if self.positions[1, i] > self.bottommargin:
+                self.velocities[1, i] = self.velocities[1, i] - self.turnfactor
+            if self.positions[1, i] < self.topmargin:
+                self.velocities[1, i] = self.velocities[1, i] + self.turnfactor
 
     def calculate_distances(self):
+        # separations is the change in position needed for the boid (in the row) to match the position of the other boid (in the column)
         self.separations = self.positions[:, np.newaxis, :] - self.positions[:, :, np.newaxis]
         squared_displacements = self.separations * self.separations
         self.square_distances = np.sum(squared_displacements, 0)
+
+    """
+    IMPORTANT
+    if differences is 2xNxN
+    this sums across the rows
+        np.sum(differences, 2)
+        
+    this sums across the columns
+        np.sum(differences, 1)
+    """
 
     def align(self):
         """
@@ -114,15 +143,22 @@ class Boid():
         :param boids: the list of all the boids in the flock
         :return: the acceleration( change velocity vector) needed to go at the max speed in the direction of all the "close" boids
         """
-        # TODO: all of this makes the boids want to go in the direction of "close" boids, but at the max speed,
-        #  rather than attempting to match the speed of the "close" boids. Should this be different? It could also just
-        #  preserve the magnitude of the velocity of the boid and just match the angle
+        velocity_differences = self.velocities[:, np.newaxis, :] - self.velocities[:, :, np.newaxis]  # the change in velocity needed to match the velocity of the other boid
+        very_far = self.square_distances > self.formation_flying_distance
+        velocity_differences_if_close = np.copy(velocity_differences)
+        velocity_differences_if_close[0, :, :][very_far] = 0
+        velocity_differences_if_close[1, :, :][very_far] = 0
 
-        far_away = self.square_distances > self.alert_distance
-        separations_if_close = np.copy(self.separations)
-        separations_if_close[0, :, :][far_away] = 0
-        separations_if_close[1, :, :][far_away] = 0
-        self.velocities += np.sum(separations_if_close, 1)
+        # get the mean velocity difference
+        velocities = np.copy(self.velocities)
+        mean_velocities_differences = np.true_divide(np.sum(velocity_differences_if_close, 2), (velocity_differences_if_close != 0).sum(2), out=velocities, where=(velocity_differences_if_close !=                                                                                                                                          0).sum(2) != 0)
+
+        # get the normed vectors and then make the magnitude equal the value of the parameter
+        for i in range(self.boid_count):
+            if mean_velocities_differences[0, i] != 0 and mean_velocities_differences[1, i] != 0:
+                mean_velocities_differences[:, i] = np.divide(mean_velocities_differences[:, i], np.linalg.norm(mean_velocities_differences[:, i])) * self.formation_flying_strength
+
+        self.velocities += mean_velocities_differences
 
     def cohesion(self):
         """
@@ -140,11 +176,20 @@ class Boid():
         np.fill_diagonal(locations_if_close[1, :, :], 0)
         locations_if_close[0, :, :][too_far] = 0
         locations_if_close[1, :, :][too_far] = 0
+
+        # get the mean positions of the nearby birds
         centers_of_mass = np.copy(self.positions)
-        centers_of_mass = np.true_divide(np.sum(locations_if_close, 2), (locations_if_close != 0).sum(1),  where=(locations_if_close != 0).sum(1) != 0)  # get the mean x and y positions
+        centers_of_mass = np.true_divide(np.sum(locations_if_close, 2), (locations_if_close != 0).sum(2), out=centers_of_mass,  where=(locations_if_close != 0).sum(2) != 0)  # get the mean x and y
+        # positions
+
         direction_to_middle = centers_of_mass - self.positions  # change in position needed to be at the middle
-        # TODO: it would make sense to normalize this
-        self.velocities += direction_to_middle * self.move_to_middle_strength
+
+        # Normalize and make the magnitude equal to that of the parameter
+        for i in range(self.boid_count):
+            if direction_to_middle[0, i] != 0 and direction_to_middle[1, i] != 0:  # ensure that a change is needed
+                direction_to_middle[:, i] = np.divide(direction_to_middle[:, i], np.linalg.norm(direction_to_middle[:, i])) * self.move_to_middle_strength
+
+        self.velocities += direction_to_middle
 
     def separation(self):
         """
@@ -155,9 +200,9 @@ class Boid():
         :param boids:
         :return:
         """
-        velocity_differences = self.velocities[:, np.newaxis, :] - self.velocities[:, :, np.newaxis]
-        very_far = self.square_distances > self.formation_flying_distance
-        velocity_differences_if_close = np.copy(velocity_differences)
-        velocity_differences_if_close[0, :, :][very_far] = 0
-        velocity_differences_if_close[1, :, :][very_far] = 0
-        self.velocities -= np.mean(velocity_differences_if_close, 1) * self.formation_flying_strength
+        far_away = self.square_distances > self.alert_distance
+        separations_if_close = np.copy(self.separations)  # separations is the change in position needed for the boid (in the row) to match the position of the other boid (in the column)
+        separations_if_close[0, :, :][far_away] = 0
+        separations_if_close[1, :, :][far_away] = 0
+        sep = np.sum(separations_if_close, 1)  # gets the change needed to go in the opposite direction of the other boids
+        self.velocities += np.sum(separations_if_close, 1)

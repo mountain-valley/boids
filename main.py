@@ -54,13 +54,13 @@ def main(count):
         #             graph.DeleteFigure(flock[-1].drawing_id)
         #             del flock[-1]
         #     current_num_birds = num_birds
-        elif event.startswith('_SLIDER_'):
-            max_force = float(values['_SLIDER_FORCE_'])
-            max_speed = int(values['_SLIDER_SPEED_'])
-            perception = int(values['_SLIDER_PERCEPTION_'])
-            flock.move_to_middle_strength = max_force
-            flock.max_speed = max_speed
-            flock.alert_distance = perception
+        # elif event.startswith('_SLIDER_'):
+        #     max_force = float(values['_SLIDER_FORCE_'])
+        #     max_speed = int(values['_SLIDER_SPEED_'])
+        #     perception = int(values['_SLIDER_PERCEPTION_'])
+        #     flock.move_to_middle_strength = max_force
+        #     flock.max_speed = max_speed
+        #     flock.alert_distance = perception
         window.Element('_NUM_BIRDS_').Update(current_num_birds)
         draw(window, flock)
 
