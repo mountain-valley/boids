@@ -26,7 +26,7 @@ class Boid():
         # limits
         self.max_speed = 3
         self.min_speed = 2
-        self.turnfactor = 0.1
+        self.turnfactor = 0.2
 
         # parameters
         self.alert_distance = 75 ** 2  # for collision avoidance
@@ -151,11 +151,11 @@ class Boid():
                                                      where=(velocity_differences_if_close != 0).sum(2) != 0)
 
         # get the normed vectors and then make the magnitude equal the value of the parameter
-        # for i in range(self.boid_count):
-        #     if mean_velocities_differences[0, i] != 0 and mean_velocities_differences[1, i] != 0:
-        #         mean_velocities_differences[:, i] = np.divide(mean_velocities_differences[:, i], np.linalg.norm(mean_velocities_differences[:, i]))
+        for i in range(self.boid_count):
+            if mean_velocities_differences[0, i] != 0 and mean_velocities_differences[1, i] != 0:
+                mean_velocities_differences[:, i] = np.divide(mean_velocities_differences[:, i], np.linalg.norm(mean_velocities_differences[:, i]))
 
-        self.velocities += mean_velocities_differences * self.formation_flying_strength
+        self.velocities += mean_velocities_differences
 
     def cohesion(self):
         """
@@ -182,11 +182,11 @@ class Boid():
         direction_to_middle = centers_of_mass - self.positions  # change in position needed to be at the middle
 
         # Normalize and make the magnitude equal to that of the parameter
-        # for i in range(self.boid_count):
-        #     if direction_to_middle[0, i] != 0 and direction_to_middle[1, i] != 0:  # ensure that a change is needed
-        #         direction_to_middle[:, i] = np.divide(direction_to_middle[:, i], np.linalg.norm(direction_to_middle[:, i])) * self.move_to_middle_strength
+        for i in range(self.boid_count):
+            if direction_to_middle[0, i] != 0 and direction_to_middle[1, i] != 0:  # ensure that a change is needed
+                direction_to_middle[:, i] = np.divide(direction_to_middle[:, i], np.linalg.norm(direction_to_middle[:, i])) * self.move_to_middle_strength
 
-        self.velocities += direction_to_middle * self.move_to_middle_strength
+        self.velocities += direction_to_middle
 
     def separation(self):
         """
@@ -209,8 +209,8 @@ class Boid():
         change = np.sum(scaled_separations, 1)
 
         # Normalize and make the magnitude equal to that of the parameter
-        # for i in range(self.boid_count):
-        #     if change[0, i] != 0 and change[1, i] != 0:  # ensure that a change is needed
-        #         change[:, i] = np.divide(change[:, i], np.linalg.norm(change[:, i])) * self.avoid_strength
+        for i in range(self.boid_count):
+            if change[0, i] != 0 and change[1, i] != 0:  # ensure that a change is needed
+                change[:, i] = np.divide(change[:, i], np.linalg.norm(change[:, i])) * self.avoid_strength
 
-        self.velocities += change * self.avoid_strength
+        self.velocities += change
