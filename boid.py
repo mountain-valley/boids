@@ -10,7 +10,7 @@ class Boid():
         # graph attributes
         self.width = width
         self.height = height
-        self.margin = 100
+        self.margin = 150
         self.topmargin = height - self.margin
         self.bottommargin = self.margin
         self.rightmargin = width - self.margin
@@ -24,14 +24,15 @@ class Boid():
         self.square_distances = None
 
         # limits
-        self.max_speed = 3
-        self.min_speed = 2
-        self.turnfactor = 0.1
+        self.max_speed = 4
+        self.min_speed = 3
+        self.turnfactor = 0.05
 
         # parameters
-        self.alert_distance = 75 ** 2  # for collision avoidance
-        self.group_distance = 75 ** 2  # for center of mass
-        self.formation_flying_distance = 75 ** 2  # for velocity matching
+        self.perception = 75
+        self.alert_distance = self.perception ** 2  # for collision avoidance
+        self.group_distance = self.perception ** 2  # for center of mass
+        self.formation_flying_distance = self.perception ** 2  # for velocity matching
         self.move_to_middle_strength = 0.0005  # for towards center of mass
         self.formation_flying_strength = 0.05  # for velocity matching
         self.avoid_strength = 0.05
@@ -43,17 +44,13 @@ class Boid():
         for i, (x, y) in enumerate(zip(self.positions[0, :], self.positions[1, :])):
             self.drawing_ids[i] = graph.DrawCircle((x, y), radius=3, fill_color='black')
 
-        # self.acceleration = Vector(*vec)
-        # self.max_force = 0.3
-        # self.perception = 100
-        #
-        # self.drawing_id = None
 
     def new_flock(self, count, lower_limits, upper_limits):
         width = upper_limits - lower_limits
         return lower_limits[:, np.newaxis] + np.random.rand(2, count) * width[:, np.newaxis]
 
     def update(self):
+        self.apply_behaviour()
 
         # limit the speed
         for i in range(self.boid_count):
@@ -82,13 +79,6 @@ class Boid():
         self.cohesion()
         self.separation()
         self.edges()  # change position if it is off-screen
-        # alignment = self.align()
-        # cohesion = self.cohesion()
-        # separation = self.separation()
-
-        # self.acceleration += alignment
-        # self.acceleration += cohesion
-        # self.acceleration += separation
 
     def edges(self):
         """
