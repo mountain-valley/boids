@@ -33,10 +33,10 @@ def main(count):
                 [sg.T('Max Speed (4)'), sg.Slider(range=(1,30), default_value=4, orientation='h', key='_SLIDER_SPEED_', enable_events=True),
                 sg.T('Min Speed (3)'), sg.Slider(range=(1,30),default_value=3,  orientation='h', key='_SLIDER_MIN_', enable_events=True)],
                 [sg.T('Number of birds'), sg.Slider(range=(4, 80), orientation='h', default_value=starting_num_birds, key='_SLIDER_', enable_events=True),
-                sg.T('Centering Strength (0.0005)'), sg.Slider(range=(0, 1), default_value=0.0005, resolution=.0001, orientation='h', key='_SLIDER_CENTER_', enable_events=True)],
-                [sg.T('Velocity Match (0.05)'), sg.Slider(range=(0, 1), default_value=0.05, resolution=.001, orientation='h', key='_SLIDER_VELOCITY_', enable_events=True),
-                sg.T('Avoid Strength (0.05)'), sg.Slider(range=(0, 1), default_value=0.05, resolution=.001, orientation='h', key='_SLIDER_AVOID_', enable_events=True)],
-                [sg.T('Turn Factor (0.05)'), sg.Slider(range=(0, 1), default_value=0.075, resolution=.001, orientation='h', key='_SLIDER_TURN_', enable_events=True),
+                sg.T('Centering Strength (0.0005)'), sg.Slider(range=(0, 100), default_value=0.0005, resolution=.0001, orientation='h', key='_SLIDER_CENTER_', enable_events=True)],
+                [sg.T('Velocity Match (0.05)'), sg.Slider(range=(0, 100), default_value=0.05, resolution=.001, orientation='h', key='_SLIDER_VELOCITY_', enable_events=True),
+                sg.T('Avoid Strength (0.05)'), sg.Slider(range=(0, 100), default_value=0.05, resolution=.001, orientation='h', key='_SLIDER_AVOID_', enable_events=True)],
+                [sg.T('Turn Factor (0.05)'), sg.Slider(range=(0, 10), default_value=0.05, resolution=.001, orientation='h', key='_SLIDER_TURN_', enable_events=True),
                 sg.T('Perception Distance (75)'), sg.Slider(range=(0, 200), default_value=75, resolution=15, orientation='h', key='_SLIDER_PERCEPTION_', enable_events=True)],
                  [sg.Exit()],]
 
@@ -44,6 +44,24 @@ def main(count):
     window.Finalize()
     # graph = window.Element('_GRAPH_')               # type: sg.Graph
     flock = Boid(count, window, width, height)   # type: Boid:list
+
+    event, values = window.Read(timeout=0)
+    min_speed = float(values['_SLIDER_MIN_'])
+    max_speed = float(values['_SLIDER_SPEED_'])
+    perception = float(values['_SLIDER_PERCEPTION_'])
+    centering = float(values['_SLIDER_CENTER_'])
+    velocity = float(values['_SLIDER_VELOCITY_'])
+    avoid = float(values['_SLIDER_AVOID_'])
+    turn = float(values['_SLIDER_TURN_'])
+
+    flock.max_speed = max_speed
+    flock.min_speed = min_speed
+    flock.turnfactor = turn
+    flock.perception = perception
+    flock.move_to_middle_strength = centering  # for towards center of mass
+    flock.formation_flying_strength = velocity  # for velocity matching
+    flock.avoid_strength = avoid
+
     while True:
         event, values = window.Read(timeout=0)
         if event in (None, 'Exit'):
@@ -59,12 +77,12 @@ def main(count):
         #     current_num_birds = num_birds
         elif event.startswith('_SLIDER_'):
             min_speed = float(values['_SLIDER_MIN_'])
-            max_speed = int(values['_SLIDER_SPEED_'])
-            perception = int(values['_SLIDER_PERCEPTION_'])
-            centering = int(values['_SLIDER_CENTER_'])
-            velocity = int(values['_SLIDER_VELOCITY_'])
-            avoid = int(values['_SLIDER_AVOID_'])
-            turn = int(values['_SLIDER_TURN_'])
+            max_speed = float(values['_SLIDER_SPEED_'])
+            perception = float(values['_SLIDER_PERCEPTION_'])
+            centering = float(values['_SLIDER_CENTER_'])
+            velocity = float(values['_SLIDER_VELOCITY_'])
+            avoid = float(values['_SLIDER_AVOID_'])
+            turn = float(values['_SLIDER_TURN_'])
 
             flock.max_speed = max_speed
             flock.min_speed = min_speed
