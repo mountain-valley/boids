@@ -110,19 +110,19 @@ class Boid():
             if self.positions[0, i] < self.leftmargin:
                 distance = self.positions[0, i]
                 if distance != 0:
-                    self.velocities[0, i] = self.velocities[0, i] + self.turnfactor + 1 / (distance ** 2)
+                    self.velocities[0, i] = self.velocities[0, i] + self.turnfactor + 1 / (distance)
             if self.positions[0, i] > self.rightmargin:
                 distance = self.width - self.positions[0, i]
                 if distance != 0:
-                    self.velocities[0, i] = self.velocities[0, i] - self.turnfactor - 1 / (distance ** 2)
+                    self.velocities[0, i] = self.velocities[0, i] - self.turnfactor - 1 / (distance)
             if self.positions[1, i] < self.bottommargin:
                 distance = self.positions[1, i]
                 if distance != 0:
-                    self.velocities[1, i] = self.velocities[1, i] + self.turnfactor + 1 / (distance ** 2)
+                    self.velocities[1, i] = self.velocities[1, i] + self.turnfactor + 1 / (distance)
             if self.positions[1, i] > self.topmargin:
                 distance = self.height - self.positions[1, i]
                 if distance != 0:
-                    self.velocities[1, i] = self.velocities[1, i] - self.turnfactor - 1 / (distance ** 2)
+                    self.velocities[1, i] = self.velocities[1, i] - self.turnfactor - 1 / (distance)
 
     def calculate_distances(self):
         # separations is the change in position needed for the boid (in the row) to match the position of the other boid (in the column)
