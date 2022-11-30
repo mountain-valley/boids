@@ -1,4 +1,6 @@
-from p5 import Vector
+import random
+
+# from p5 import Vector
 import numpy as np
 # import PySimpleGUIWeb as sg
 import PySimpleGUI as sg
@@ -9,6 +11,7 @@ class Boid():
 
     def __init__(self, count=200, centering=0.0005, align=0.05, avoid=0.05, perception=100, turn=0.1, speed_max=4, speed_min=3, width=800, height=800):
         # graph attributes
+        self.iterations = 0
         self.width = width
         self.height = height
         self.margin = 150
@@ -25,8 +28,8 @@ class Boid():
         self.square_distances = None
 
         # limits
-        self.max_speed = 4
-        self.min_speed = 3
+        self.max_speed = speed_max
+        self.min_speed = speed_min
         self.turnfactor = turn
 
         # parameters
@@ -44,11 +47,61 @@ class Boid():
         :param steps:
         :return: the positions and velocities at the end
         """
+
+        avg_order = 0
+        steps_avg = 50
         for i in range(steps):
             self.edges()
             self.update()
+            if i >= steps - steps_avg:
+                avg_order += self.polarization()
+        avg_order = avg_order / steps_avg
+        return avg_order
 
-        return self.positions, self.velocities
+    def reset_param(self, count=200, centering=0.0005, align=0.05, avoid=0.05, perception=100, turn=0.1, speed_max=4, speed_min=3, width=400, height=400):
+        # graph attributes
+        self.iterations = 0
+        self.width = width
+        self.height = height
+        self.margin = 100
+        self.topmargin = height - self.margin
+        self.bottommargin = self.margin
+        self.rightmargin = width - self.margin
+        self.leftmargin = self.margin
+
+        self.boid_count = count
+        self.limits = np.array([2000, 2000])
+        self.positions = self.new_flock(self.boid_count, np.array([0, 0]), np.array([self.width, self.height]))
+        self.velocities = self.new_flock(self.boid_count, np.array([0, -20]), np.array([10, 20]))
+        self.separations = None
+        self.square_distances = None
+
+        # limits
+        self.max_speed = speed_max
+        self.min_speed = speed_min
+        self.turnfactor = turn
+
+        # parameters
+        self.perception = perception
+        self.alert_distance = self.perception ** 2  # for collision avoidance
+        self.group_distance = self.perception ** 2  # for center of mass
+        self.formation_flying_distance = self.perception ** 2  # for velocity matching
+        self.move_to_middle_strength = centering  # for towards center of mass
+        self.formation_flying_strength = align  # for velocity matching
+        self.avoid_strength = avoid
+
+    def polarization(self):
+        """
+        Caluclates the polarization of the flock, a measure of global ordering. It represents how aligned the velocities of the individual birds are. The higher the number, the more aligned the birds
+        are. A nonzero value indicates that the center of mass of the flock is moving. Bigger is better/more accurate for flocks
+        :param input_flock:
+        :return:
+        """
+        normed_vel = normalize(self.velocities, axis=0)
+        sum_vel = np.sum(normed_vel, axis=1)
+        sum_vel = sum_vel / self.boid_count
+        order = np.linalg.norm(sum_vel)
+        return order
 
     def reset_flock(self):
         """
@@ -72,6 +125,7 @@ class Boid():
                 self.velocities[:, i] = np.divide(self.velocities[:, i], np.linalg.norm(self.velocities[:, i])) * self.min_speed
 
         self.positions += self.velocities
+        self.iterations += 1
 
     def apply_behaviour(self):
         """
@@ -239,7 +293,7 @@ class Boid_visual():
         self.iterations = 0
         self.width = width
         self.height = height
-        self.margin = 150
+        self.margin = 100
         self.topmargin = height - self.margin
         self.bottommargin = self.margin
         self.rightmargin = width - self.margin
@@ -346,32 +400,32 @@ class Boid_visual():
                 self.positions[1, i] = self.height
 
             # turn when approaching edges
-            if self.positions[0, i] < self.leftmargin:
-                self.velocities[0, i] = self.velocities[0, i] + self.turnfactor
-            if self.positions[0, i] > self.rightmargin:
-                self.velocities[0, i] = self.velocities[0, i] - self.turnfactor
-            if self.positions[1, i] < self.bottommargin:
-                self.velocities[1, i] = self.velocities[1, i] + self.turnfactor
-            if self.positions[1, i] > self.topmargin:
-                self.velocities[1, i] = self.velocities[1, i] - self.turnfactor
+            # if self.positions[0, i] < self.leftmargin:
+            #     self.velocities[0, i] = self.velocities[0, i] + self.turnfactor
+            # if self.positions[0, i] > self.rightmargin:
+            #     self.velocities[0, i] = self.velocities[0, i] - self.turnfactor
+            # if self.positions[1, i] < self.bottommargin:
+            #     self.velocities[1, i] = self.velocities[1, i] + self.turnfactor
+            # if self.positions[1, i] > self.topmargin:
+            #     self.velocities[1, i] = self.velocities[1, i] - self.turnfactor
 
             # turn when approaching edges
-            # if self.positions[0, i] < self.leftmargin:
-            #     distance = self.positions[0, i]
-            #     if distance != 0:
-            #         self.velocities[0, i] = self.velocities[0, i] + self.turnfactor + 1 / (distance)
-            # if self.positions[0, i] > self.rightmargin:
-            #     distance = self.width - self.positions[0, i]
-            #     if distance != 0:
-            #         self.velocities[0, i] = self.velocities[0, i] - self.turnfactor - 1 / (distance)
-            # if self.positions[1, i] < self.bottommargin:
-            #     distance = self.positions[1, i]
-            #     if distance != 0:
-            #         self.velocities[1, i] = self.velocities[1, i] + self.turnfactor + 1 / (distance)
-            # if self.positions[1, i] > self.topmargin:
-            #     distance = self.height - self.positions[1, i]
-            #     if distance != 0:
-            #         self.velocities[1, i] = self.velocities[1, i] - self.turnfactor - 1 / (distance)
+            if self.positions[0, i] < self.leftmargin:
+                distance = self.positions[0, i]
+                if distance != 0:
+                    self.velocities[0, i] = self.velocities[0, i] + self.turnfactor + 1 / (distance)
+            if self.positions[0, i] > self.rightmargin:
+                distance = self.width - self.positions[0, i]
+                if distance != 0:
+                    self.velocities[0, i] = self.velocities[0, i] - self.turnfactor - 1 / (distance)
+            if self.positions[1, i] < self.bottommargin:
+                distance = self.positions[1, i]
+                if distance != 0:
+                    self.velocities[1, i] = self.velocities[1, i] + self.turnfactor + 1 / (distance)
+            if self.positions[1, i] > self.topmargin:
+                distance = self.height - self.positions[1, i]
+                if distance != 0:
+                    self.velocities[1, i] = self.velocities[1, i] - self.turnfactor - 1 / (distance)
 
     def calculate_distances(self):
         # separations is the change in position needed for the boid (in the row) to match the position of the other boid (in the column)
@@ -483,5 +537,13 @@ class Boid_visual():
 
         self.velocities += scaled_separations * self.pred_avoid_strength
 
+    def update_predator(self):
+        one = np.ones((2, self.boid_count))
+        rand = np.random.rand(2)
+        one = one[0] * np.random.random()
+        one = one[1] * np.random.random()
+        self.predators_loc += one
+
     def object_avoid(self):
         self.predator_dist()
+        self.update_predator()
