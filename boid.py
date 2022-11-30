@@ -95,15 +95,34 @@ class Boid():
             elif self.positions[1, i] < 0:
                 self.positions[1, i] = self.height
 
+            # far_away = self.square_distances > self.alert_distance
+            # separations_if_close = np.copy(self.separations)  # separations is the change in position needed for the boid (in the row) to match the position of the other boid (in the column)
+            # separations_if_close[0, :, :][far_away] = 0
+            # separations_if_close[1, :, :][far_away] = 0
+            #
+            # # scale the differences by the inverse distance (dividing by the square distance essentially norms it then scales by the inverse distance)
+            # scaled_separations = np.copy(separations_if_close)
+            # scaled_separations = np.true_divide(separations_if_close, self.square_distances, out=scaled_separations, where=separations_if_close != 0)
+            #
+            # change = np.sum(scaled_separations, 1)
+
             # turn when approaching edges
             if self.positions[0, i] < self.leftmargin:
-                self.velocities[0, i] = self.velocities[0, i] + self.turnfactor
+                distance = self.positions[0, i]
+                if distance != 0:
+                    self.velocities[0, i] = self.velocities[0, i] + self.turnfactor + 1 / (distance ** 2)
             if self.positions[0, i] > self.rightmargin:
-                self.velocities[0, i] = self.velocities[0, i] - self.turnfactor
+                distance = self.width - self.positions[0, i]
+                if distance != 0:
+                    self.velocities[0, i] = self.velocities[0, i] - self.turnfactor - 1 / (distance ** 2)
             if self.positions[1, i] < self.bottommargin:
-                self.velocities[1, i] = self.velocities[1, i] + self.turnfactor
+                distance = self.positions[1, i]
+                if distance != 0:
+                    self.velocities[1, i] = self.velocities[1, i] + self.turnfactor + 1 / (distance ** 2)
             if self.positions[1, i] > self.topmargin:
-                self.velocities[1, i] = self.velocities[1, i] - self.turnfactor
+                distance = self.height - self.positions[1, i]
+                if distance != 0:
+                    self.velocities[1, i] = self.velocities[1, i] - self.turnfactor - 1 / (distance ** 2)
 
     def calculate_distances(self):
         # separations is the change in position needed for the boid (in the row) to match the position of the other boid (in the column)
