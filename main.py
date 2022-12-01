@@ -10,7 +10,6 @@ starting_num_birds = 40
 size_choices = {'1000x1000':1000, '800x800':800, '400x400':400, '200x200':200}
 
 def draw(window, flock):
-    flock.edges()
     flock.update()
     flock.show(window)
 
@@ -104,4 +103,4 @@ def main(count):
     window.Close()
 
 if __name__ == '__main__':
-    main(200)
+    main(50)
